@@ -1,0 +1,610 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070b13">
+<title>GEMINI AI TURBO</title>
+<style>
+:root{
+ --bg:#070b13;--panel:#0d1422;--panel2:#111c2d;
+ --line:#1c2c43;--blue:#28aaff;--cyan:#00e5ff;
+ --text:#eaf4ff;--muted:#8193aa;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Arial,Helvetica,sans-serif;height:100dvh;
+ overflow:hidden;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{height:100dvh;display:flex;flex-direction:column}
+header{
+ height:62px;flex-shrink:0;display:flex;align-items:center;
+ justify-content:space-between;padding:0 14px;
+ background:#0a101c;border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo{
+ width:38px;height:38px;border-radius:13px;
+ display:grid;place-items:center;font-size:22px;
+ background:linear-gradient(135deg,#087bff,#00e5ff);
+ box-shadow:0 0 20px #008cff55;
+}
+.brand b{font-size:15px;letter-spacing:1px}
+.brand small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.head-actions{display:flex;gap:8px}
+.iconbtn{
+ width:38px;height:38px;border:1px solid var(--line);
+ border-radius:12px;background:var(--panel);color:white;font-size:17px;
+}
+.modelbar{
+ display:flex;align-items:center;gap:9px;padding:9px 13px;
+ background:#0a101c;border-bottom:1px solid var(--line);
+}
+.modelbar select{
+ flex:1;min-width:0;background:var(--panel2);color:white;
+ border:1px solid var(--line);border-radius:10px;padding:10px;
+ outline:none;font-size:12px;
+}
+.status{font-size:10px;color:#52e8a4;white-space:nowrap}
+main{flex:1;overflow-y:auto;padding:18px 13px 25px;scroll-behavior:smooth}
+.welcome{text-align:center;margin:9vh auto 30px;max-width:440px}
+.orb{
+ width:82px;height:82px;margin:auto auto 18px;border-radius:50%;
+ display:grid;place-items:center;font-size:38px;
+ background:radial-gradient(circle at 35% 30%,#35d8ff,#0754bd 60%,#08152d);
+ box-shadow:0 0 45px #008cff55;
+}
+.welcome h1{font-size:25px;margin:0 0 9px}
+.welcome p{color:var(--muted);font-size:13px;line-height:1.6}
+.suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
+.suggest{
+ border:1px solid var(--line);background:var(--panel);
+ color:#b9d9f8;border-radius:20px;padding:9px 12px;font-size:11px;
+}
+.message{display:flex;margin:16px 0;gap:9px;align-items:flex-start}
+.avatar{
+ flex-shrink:0;width:30px;height:30px;border-radius:10px;
+ display:grid;place-items:center;background:#102b48;font-size:15px;
+}
+.message.user{flex-direction:row-reverse}
+.message.user .avatar{background:#123a63}
+.bubble{
+ max-width:min(88%,680px);padding:12px 14px;border-radius:15px;
+ background:var(--panel);border:1px solid var(--line);
+ font-size:14px;line-height:1.65;overflow-wrap:anywhere;
+}
+.message.user .bubble{background:#102b43;border-color:#1a5683}
+.bubble pre{
+ white-space:pre-wrap;overflow-x:auto;background:#060b13;
+ padding:12px;border-radius:9px;font-size:12px;
+}
+.bubble code{color:#80e7ff}
+.bubble p{margin:5px 0}
+.bubble a{color:var(--cyan)}
+.typing-wrap{display:flex;align-items:center;gap:12px;margin:14px 0 14px 38px}
+.bagua{
+ width:38px;height:38px;border:2px solid transparent;
+ border-top-color:#ff4b4b;border-right-color:#ffda44;
+ border-bottom-color:#35e878;border-left-color:#3a8cff;
+ border-radius:50%;animation:spin 1s linear infinite;
+ box-shadow:0 0 12px #00c8ff55;
+ position:relative;
+}
+.bagua:after{
+ content:"☯";position:absolute;inset:0;display:grid;place-items:center;
+ color:#fff;font-size:21px;animation:spin 3s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.typing-text{font-size:12px;color:var(--cyan)}
+.composer{
+ flex-shrink:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+ background:#0a101c;border-top:1px solid var(--line);
+}
+.inputbox{
+ display:flex;align-items:flex-end;gap:8px;padding:9px;
+ border:1px solid #203b59;border-radius:17px;background:#101a29;
+ box-shadow:0 0 18px #008cff12;
+}
+#prompt{
+ flex:1;min-height:42px;max-height:125px;resize:none;
+ border:0;outline:0;background:transparent;color:white;
+ font-size:14px;padding:10px 5px;line-height:1.5;
+}
+#prompt::placeholder{color:#72849a}
+.send{
+ width:43px;height:43px;border:0;border-radius:13px;
+ color:white;font-size:19px;
+ background:linear-gradient(135deg,#087cff,#00cfff);
+}
+.send:disabled{opacity:.5}
+.bottomnote{text-align:center;color:#586b82;font-size:9px;margin-top:8px}
+.drawer{
+ position:fixed;inset:0;z-index:5;background:#0009;
+ display:none;
+}
+.drawer.show{display:block}
+.side{
+ width:min(310px,85vw);height:100%;background:#0b1320;
+ border-right:1px solid var(--line);padding:16px;overflow:auto;
+}
+.sidehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.side h3{font-size:15px}
+.primary,.secondary,.danger{
+ border:0;border-radius:10px;padding:11px 13px;color:white;
+ background:#087bda;width:100%;margin:5px 0;
+}
+.secondary{background:#17263a;border:1px solid var(--line)}
+.danger{background:#672c38}
+.chatitem{
+ padding:12px;margin:7px 0;background:var(--panel);
+ border:1px solid var(--line);border-radius:11px;
+ display:flex;justify-content:space-between;gap:8px;
+ font-size:12px;align-items:center;
+}
+.chatitem span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.chatitem button{border:0;background:transparent;color:#91a7bd}
+.modal{
+ display:none;position:fixed;inset:0;z-index:10;
+ background:#000b;align-items:center;justify-content:center;padding:16px;
+}
+.modal.show{display:flex}
+.dialog{
+ width:min(430px,100%);max-height:85dvh;overflow:auto;
+ background:#0d1726;border:1px solid #234363;
+ border-radius:18px;padding:19px;
+ box-shadow:0 0 40px #008cff22;
+}
+.dialog h2{font-size:18px;margin:0 0 16px}
+.dialog label{display:block;color:#9fb4ca;font-size:12px;margin:13px 0 6px}
+.field{
+ width:100%;padding:12px;border-radius:10px;
+ border:1px solid var(--line);background:#07101c;color:white;outline:none;
+}
+.dialog .close{float:right;border:0;background:transparent;color:white;font-size:20px}
+.toast{
+ position:fixed;bottom:105px;left:50%;transform:translateX(-50%);
+ background:#172b40;color:white;padding:11px 16px;border-radius:12px;
+ font-size:12px;z-index:20;display:none;max-width:90%;
+}
+@media(min-width:700px){
+ main{padding-left:max(20px,calc((100% - 800px)/2));padding-right:max(20px,calc((100% - 800px)/2))}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand" id="brand">
+  <div class="logo">✦</div>
+  <div><b id="appName">GEMINI AI TURBO</b><small>PERSONAL AI ASSISTANT</small></div>
+ </div>
+ <div class="head-actions">
+  <button class="iconbtn" id="newBtn" title="Cuộc trò chuyện mới">＋</button>
+  <button class="iconbtn" id="menuBtn" title="Lịch sử">☰</button>
+  <button class="iconbtn" id="settingsBtn" title="Cài đặt">⚙</button>
+ </div>
+</header>
+
+<div class="modelbar">
+ <select id="model">
+  <option value="gemini-3.8-flash">Gemini 3.8 Flash · Nhanh</option>
+  <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro · Nâng cao</option>
+ </select>
+ <span class="status" id="status">● Sẵn sàng</span>
+</div>
+
+<main id="chat">
+ <section class="welcome" id="welcome">
+  <div class="orb">✦</div>
+  <h1>Xin chào! 👋</h1>
+  <p>Tôi là Gemini AI Turbo. Hãy đặt câu hỏi, học tập, viết code hoặc khám phá ý tưởng mới.</p>
+  <div class="suggestions">
+   <button class="suggest">Viết code HTML đẹp</button>
+   <button class="suggest">Giải thích bài học</button>
+   <button class="suggest">Lên ý tưởng ứng dụng</button>
+   <button class="suggest">Viết một câu chuyện</button>
+  </div>
+ </section>
+ <div id="messages"></div>
+ <div id="typing" class="typing-wrap" style="display:none">
+  <div class="bagua"></div><div class="typing-text" id="typingText">Gemini đang suy nghĩ...</div>
+ </div>
+</main>
+
+<div class="composer">
+ <div class="inputbox">
+  <textarea id="prompt" placeholder="Nhập tin nhắn cho Gemini..." rows="1"></textarea>
+  <button class="send" id="sendBtn">➤</button>
+ </div>
+ <div class="bottomnote">AI có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.</div>
+</div>
+</div>
+
+<div class="drawer" id="drawer">
+ <div class="side">
+  <div class="sidehead"><h3>☰ LỊCH SỬ CHAT</h3><button class="iconbtn" id="closeDrawer">×</button></div>
+  <button class="primary" id="drawerNew">＋ Cuộc trò chuyện mới</button>
+  <div id="historyList"></div>
+  <hr style="border-color:#1c2c43;margin:18px 0">
+  <button class="secondary" id="exportBtn">⇩ Xuất dữ liệu JSON</button>
+  <button class="secondary" id="importBtn">⇧ Nhập dữ liệu JSON</button>
+  <input type="file" id="importFile" accept=".json,application/json" hidden>
+ </div>
+</div>
+
+<div class="modal" id="settingsModal">
+ <div class="dialog">
+  <button class="close" data-close="settingsModal">×</button>
+  <h2>⚙ Cài đặt</h2>
+  <label>Gemini API Key</label>
+  <input class="field" id="apiKey" type="password" placeholder="Dán API key của bạn">
+  <label>Hướng dẫn cho AI</label>
+  <textarea class="field" id="systemPrompt" rows="4">Bạn là một trợ lý AI hữu ích. Trả lời bằng tiếng Việt, rõ ràng và dễ hiểu.</textarea>
+  <button class="primary" id="saveSettings">Lưu cài đặt</button>
+  <p style="font-size:10px;color:#8193aa;line-height:1.5">API key được lưu trong trình duyệt trên thiết bị này. Không chia sẻ file HTML có chứa API key và không gửi key cho người khác.</p>
+ </div>
+</div>
+
+<div class="modal" id="adminModal">
+ <div class="dialog">
+  <button class="close" data-close="adminModal">×</button>
+  <h2>♛ ADMIN CONTROL</h2>
+  <div id="adminLogin">
+   <label>Mật khẩu quản trị</label>
+   <input class="field" id="adminPassword" type="password" placeholder="Nhập mật khẩu">
+   <button class="primary" id="adminLoginBtn">Đăng nhập</button>
+  </div>
+  <div id="adminPanel" style="display:none">
+   <label>Tên ứng dụng</label>
+   <input class="field" id="newAppName" placeholder="Tên ứng dụng">
+   <button class="primary" id="changeName">Đổi tên ứng dụng</button>
+   <button class="secondary" id="adminExport">Xuất dữ liệu chat</button>
+   <button class="danger" id="clearAll">Xóa toàn bộ lịch sử chat</button>
+   <p style="font-size:10px;color:#8193aa">Bảng quản trị này chỉ ẩn giao diện, không phải hệ thống bảo mật thực sự.</p>
+  </div>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const STORE = "gemini_turbo_chats_v4";
+const KEYSTORE = "gemini_turbo_api_key";
+const MODELSTORE = "gemini_turbo_model";
+let chats = [];
+let currentId = null;
+let busy = false;
+let controller = null;
+let logoTaps = 0;
+let logoTimer = null;
+
+function uid(){
+ return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+}
+function toast(msg){
+ const el=$("toast");
+ el.textContent=msg;el.style.display="block";
+ clearTimeout(toast.timer);
+ toast.timer=setTimeout(()=>el.style.display="none",2600);
+}
+function saveChats(){
+ try{localStorage.setItem(STORE,JSON.stringify(chats))}
+ catch(e){toast("Bộ nhớ đầy, hãy xuất dữ liệu chat")}
+}
+function getCurrent(){
+ return chats.find(c=>c.id===currentId);
+}
+function createChat(){
+ const c={id:uid(),title:"Cuộc trò chuyện mới",messages:[],updated:Date.now()};
+ chats.unshift(c);currentId=c.id;saveChats();renderAll();
+ $("prompt").focus();
+}
+function loadChats(){
+ try{
+  const data=JSON.parse(localStorage.getItem(STORE)||"[]");
+  chats=Array.isArray(data)?data:[];
+ }catch(e){chats=[]}
+ if(!chats.length)createChat();
+ else{currentId=chats[0].id;renderAll()}
+}
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
+}
+function formatText(text){
+ let s=escapeHTML(text);
+ s=s.replace(/```([\w-]*)\n?([\s\S]*?)```/g,
+  (_,lang,code)=>'<pre><code>'+code.trim()+'</code></pre>');
+ s=s.replace(/`([^`]+)`/g,"<code>$1</code>");
+ s=s.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>");
+ s=s.replace(/\*(.*?)\*/g,"<i>$1</i>");
+ s=s.replace(/\n/g,"<br>");
+ return s;
+}
+function renderMessages(){
+ const c=getCurrent();
+ $("welcome").style.display=c&&c.messages.length?"none":"block";
+ $("messages").innerHTML="";
+ if(!c)return;
+ c.messages.forEach(m=>{
+  const row=document.createElement("div");
+  row.className="message "+(m.role==="user"?"user":"");
+  const avatar=document.createElement("div");
+  avatar.className="avatar";
+  avatar.textContent=m.role==="user"?"👤":"✦";
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+  bubble.innerHTML=formatText(m.text||"");
+  row.append(avatar,bubble);
+  $("messages").appendChild(row);
+ });
+ scrollBottom();
+}
+function scrollBottom(){
+ $("chat").scrollTop=$("chat").scrollHeight;
+}
+function renderHistory(){
+ const list=$("historyList");list.innerHTML="";
+ chats.forEach(c=>{
+  const row=document.createElement("div");row.className="chatitem";
+  const name=document.createElement("span");name.textContent=c.title;
+  name.title=c.title;
+  name.onclick=()=>{currentId=c.id;renderAll();closeDrawer()};
+  const rename=document.createElement("button");rename.textContent="✎";
+  rename.title="Đổi tên";
+  rename.onclick=()=>{
+   const n=prompt("Tên cuộc trò chuyện:",c.title);
+   if(n&&n.trim()){c.title=n.trim();saveChats();renderHistory()}
+  };
+  const del=document.createElement("button");del.textContent="×";
+  del.title="Xóa";
+  del.onclick=()=>{
+   if(!confirm("Xóa cuộc trò chuyện này?"))return;
+   chats=chats.filter(x=>x.id!==c.id);
+   if(!chats.length)createChat();
+   else if(currentId===c.id)currentId=chats[0].id;
+   saveChats();renderAll();
+  };
+  row.append(name,rename,del);list.appendChild(row);
+ });
+}
+function renderAll(){renderMessages();renderHistory()}
+function openDrawer(){$("drawer").classList.add("show")}
+function closeDrawer(){$("drawer").classList.remove("show")}
+function addMessage(role,text){
+ const c=getCurrent();
+ const m={role,text};
+ c.messages.push(m);c.updated=Date.now();
+ if(role==="user"&&c.title==="Cuộc trò chuyện mới"){
+  c.title=text.slice(0,32)+(text.length>32?"…":"");
+ }
+ saveChats();renderMessages();renderHistory();
+ return m;
+}
+function setBusy(on){
+ busy=on;
+ $("typing").style.display=on?"flex":"none";
+ $("sendBtn").textContent=on?"■":"➤";
+ $("status").textContent=on?"● Đang trả lời":"● Sẵn sàng";
+ $("status").style.color=on?"#ffd166":"#52e8a4";
+ $("prompt").disabled=on;
+}
+function stopGeneration(){
+ if(controller)controller.abort();
+}
+async function wait(ms,signal){
+ return new Promise((resolve,reject)=>{
+  const timer=setTimeout(resolve,ms);
+  if(signal){
+   signal.addEventListener("abort",()=>{
+    clearTimeout(timer);
+    reject(new DOMException("Đã dừng","AbortError"));
+   },{once:true});
+  }
+ });
+}
+function errorMessage(data,status){
+ const msg=data?.error?.message||data?.message||"";
+ if(status===429)return "API đang giới hạn số lượt hoặc đã hết quota. Hãy kiểm tra hạn mức API.";
+ if(status===503)return "Máy chủ Gemini đang quá tải. Ứng dụng sẽ tự thử lại.";
+ if(status===400)return "Yêu cầu không hợp lệ: "+msg;
+ if(status===401||status===403)return "API key không hợp lệ hoặc chưa được cấp quyền: "+msg;
+ return msg||("Lỗi HTTP "+status);
+}
+async function callGemini(model,key,body,signal){
+ const url="https://generativelanguage.googleapis.com/v1beta/models/"+
+ encodeURIComponent(model)+":streamGenerateContent?alt=sse&key="+
+ encodeURIComponent(key);
+ const delays=[1500,3000,6000,10000];
+ let response;
+ for(let attempt=0;attempt<=delays.length;attempt++){
+  response=await fetch(url,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify(body),
+   signal
+  });
+  if(response.ok)break;
+  let data={};
+  try{data=await response.clone().json()}catch(e){}
+  const retryable=[429,500,502,503,504].includes(response.status);
+  if(!retryable||attempt===delays.length){
+   throw new Error(errorMessage(data,response.status));
+  }
+  $("typingText").textContent="Máy chủ bận · Đang thử lại "+(attempt+1)+"/4";
+  await wait(delays[attempt]+Math.floor(Math.random()*500),signal);
+ }
+ return response;
+}
+async function generate(){
+ if(busy){stopGeneration();return}
+ const key=localStorage.getItem(KEYSTORE)||"";
+ if(!key){$("settingsModal").classList.add("show");toast("Bạn cần nhập Gemini API Key");return}
+ const prompt=$("prompt").value.trim();
+ if(!prompt)return;
+ const c=getCurrent();
+ if(!c)return;
+ $("prompt").value="";
+ $("prompt").style.height="42px";
+ addMessage("user",prompt);
+ const history=c.messages.slice(0,-1).map(m=>({
+  role:m.role==="assistant"?"model":"user",
+  parts:[{text:m.text}]
+ }));
+ const model=$("model").value;
+ localStorage.setItem(MODELSTORE,model);
+ const system=$("systemPrompt").value.trim();
+ const body={
+  contents:[...history,{role:"user",parts:[{text:prompt}]}],
+  generationConfig:{temperature:0.7,topP:0.95,maxOutputTokens:4096}
+ };
+ if(system)body.systemInstruction={parts:[{text:system}]};
+ controller=new AbortController();
+ setBusy(true);
+ $("typingText").textContent="Gemini đang suy nghĩ...";
+ const assistant=addMessage("assistant","");
+ let answer="";
+ try{
+  const response=await callGemini(model,key,body,controller.signal);
+  const reader=response.body.getReader();
+  const decoder=new TextDecoder();
+  let buffer="";
+  while(true){
+   const {value,done}=await reader.read();
+   if(done)break;
+   buffer+=decoder.decode(value,{stream:true});
+   const lines=buffer.split(/\r?\n/);
+   buffer=lines.pop()||"";
+   for(const line of lines){
+    if(!line.startsWith("data:"))continue;
+    const raw=line.slice(5).trim();
+    if(!raw||raw==="[DONE]")continue;
+    let data;
+    try{data=JSON.parse(raw)}catch(e){continue}
+    if(data.error)throw new Error(data.error.message||"Gemini API error");
+    const parts=data.candidates?.[0]?.content?.parts||[];
+    for(const part of parts){
+     if(typeof part.text==="string")answer+=part.text;
+    }
+    assistant.text=answer||"";
+    saveChats();renderMessages();
+   }
+  }
+  if(buffer.startsWith("data:")){
+   try{
+    const data=JSON.parse(buffer.slice(5).trim());
+    const parts=data.candidates?.[0]?.content?.parts||[];
+    for(const part of parts)if(typeof part.text==="string")answer+=part.text;
+   }catch(e){}
+  }
+  if(!answer)throw new Error("Gemini không trả về nội dung. Hãy thử lại.");
+  assistant.text=answer;
+ }catch(err){
+  if(err.name==="AbortError"){
+   assistant.text=answer?answer+"\n\n[Đã dừng tạo câu trả lời.]":"[Đã dừng.]";
+  }else{
+   assistant.text=answer?answer+"\n\n[Lỗi khi tiếp tục: "+err.message+"]":"Lỗi: "+err.message;
+  }
+ }finally{
+  saveChats();renderMessages();setBusy(false);
+  controller=null;$("prompt").focus();
+ }
+}
+function exportData(){
+ const data={version:1,exportedAt:new Date().toISOString(),chats};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download="gemini-turbo-backup.json";a.click();
+ URL.revokeObjectURL(url);
+ toast("Đã xuất dữ liệu");
+}
+function importData(file){
+ const reader=new FileReader();
+ reader.onload=()=>{
+  try{
+   const data=JSON.parse(reader.result);
+   const incoming=Array.isArray(data)?data:data.chats;
+   if(!Array.isArray(incoming))throw new Error("Sai định dạng");
+   if(!confirm("Nhập dữ liệu? Lịch sử hiện tại sẽ được thay thế."))return;
+   chats=incoming.filter(c=>c&&c.id&&Array.isArray(c.messages));
+   if(!chats.length)createChat();
+   else currentId=chats[0].id;
+   saveChats();renderAll();toast("Nhập dữ liệu thành công");
+  }catch(e){toast("File JSON không hợp lệ")}
+ };
+ reader.readAsText(file);
+}
+$("sendBtn").onclick=generate;
+$("prompt").addEventListener("keydown",e=>{
+ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();generate()}
+});
+$("prompt").addEventListener("input",()=>{
+ $("prompt").style.height="42px";
+ $("prompt").style.height=Math.min($("prompt").scrollHeight,125)+"px";
+});
+$("newBtn").onclick=createChat;
+$("drawerNew").onclick=()=>{createChat();closeDrawer()};
+$("menuBtn").onclick=openDrawer;
+$("closeDrawer").onclick=closeDrawer;
+$("drawer").addEventListener("click",e=>{if(e.target===$("drawer"))closeDrawer()});
+$("settingsBtn").onclick=()=>$("settingsModal").classList.add("show");
+document.querySelectorAll("[data-close]").forEach(b=>{
+ b.onclick=()=>$(b.dataset.close).classList.remove("show");
+});
+$("saveSettings").onclick=()=>{
+ const key=$("apiKey").value.trim();
+ if(key)localStorage.setItem(KEYSTORE,key);
+ toast("Đã lưu cài đặt");$("settingsModal").classList.remove("show");
+};
+$("apiKey").value=localStorage.getItem(KEYSTORE)||"";
+$("model").value=localStorage.getItem(MODELSTORE)||"gemini-3.8-flash";
+$("model").addEventListener("change",e=>localStorage.setItem(MODELSTORE,e.target.value));
+$("exportBtn").onclick=exportData;
+$("adminExport").onclick=exportData;
+$("importBtn").onclick=()=>$("importFile").click();
+$("importFile").onchange=e=>{
+ if(e.target.files[0])importData(e.target.files[0]);
+ e.target.value="";
+};
+document.querySelectorAll(".suggest").forEach(b=>{
+ b.onclick=()=>{$("prompt").value=b.textContent;$("prompt").focus()}
+});
+$("brand").addEventListener("click",()=>{
+ logoTaps++;
+ clearTimeout(logoTimer);
+ logoTimer=setTimeout(()=>logoTaps=0,1800);
+ if(logoTaps>=5){
+  logoTaps=0;$("adminModal").classList.add("show");
+ }
+});
+$("adminLoginBtn").onclick=()=>{
+ if($("adminPassword").value==="GEMINI226"){
+  $("adminLogin").style.display="none";
+  $("adminPanel").style.display="block";
+  $("newAppName").value=$("appName").textContent;
+  toast("Đăng nhập quản trị thành công");
+ }else toast("Mật khẩu không chính xác");
+};
+$("changeName").onclick=()=>{
+ const name=$("newAppName").value.trim();
+ if(!name)return;
+ $("appName").textContent=name;
+ localStorage.setItem("gemini_turbo_app_name",name);
+ toast("Đã đổi tên ứng dụng");
+};
+$("clearAll").onclick=()=>{
+ if(!confirm("Bạn chắc chắn muốn xóa toàn bộ lịch sử?"))return;
+ chats=[];createChat();toast("Đã xóa lịch sử");
+};
+const savedName=localStorage.getItem("gemini_turbo_app_name");
+if(savedName)$("appName").textContent=savedName;
+loadChats();
+</script>
+</body>
+</html>
